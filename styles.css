@@ -1,0 +1,259 @@
+
+*, *::before, *::after {
+    box-sizing: border-box;
+  }/*so that padding and margin are included in content*/
+  
+  body {
+    margin: 0;
+  }
+  
+  .video-container {
+    position: relative;
+    width: 90%;
+    max-width: 1000px;/*adjusting what it looks like in expansion of tab size*/
+    display: flex;
+    justify-content: center;
+    margin-inline: auto;
+    background-color: black;/*for theatre mode bars to left and right*/
+  }
+  
+  .video-container.theater,
+  .video-container.full-screen {
+    max-width: initial;
+    width: 100%;
+  }
+  
+  .video-container.theater {
+    max-height: 90vh;/*space at bottom*/
+  }
+  
+  .video-container.full-screen {
+    max-height: 100vh;
+  }
+  
+  video {
+    width: 100%;
+  }
+  
+  .video-controls-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;/*takes 150ms to happen*/
+  }/* setting the position and color of icon*/
+  
+  .video-controls-container::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, .75), transparent);/*black bg fading upwards - makes it easy to see icons*/ 
+    width: 100%;
+    aspect-ratio: 6 / 1; /*no matter what size our video container gets it will cover the same amount*/
+    z-index: -1;/*behind all the layers*/
+    pointer-events: none;/*so that we can still play/pause while clicking in that region*/
+  }
+  
+  .video-container:hover .video-controls-container,
+  .video-container:focus-within .video-controls-container,
+  .video-container.paused .video-controls-container {
+    opacity: 1;
+  }
+  
+  .video-controls-container .controls {
+    display: flex;
+    gap: .5rem;
+    padding: .25rem;
+    align-items: center;
+  }
+  
+  .video-controls-container .controls button {
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+    height: 30px;
+    width: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: .85;
+    transition: opacity 150ms ease-in-out;
+  }
+  
+  .video-controls-container .controls button:hover {
+    opacity: 1;
+  }
+  
+  .video-container.paused .pause-icon {
+    display: none;
+  }/*doesn't show pause icon when already paused*/
+  
+  .video-container:not(.paused) .play-icon {
+    display: none;/*doesn't show play icon when already not paused*/
+  }
+  
+  .video-container.theater .tall {
+    display: none;
+  }
+  
+  .video-container:not(.theater) .wide {
+    display: none;
+  }
+  
+  .video-container.full-screen .open {
+    display: none;
+  }
+  
+  .video-container:not(.full-screen) .close {
+    display: none;
+  }
+  
+  .volume-high-icon,
+  .volume-low-icon,
+  .volume-muted-icon {
+    display: none;
+  }
+  
+  .video-container[data-volume-level="high"] .volume-high-icon {
+    display: block;
+  }
+  
+  .video-container[data-volume-level="low"] .volume-low-icon {
+    display: block;
+  }
+  
+  .video-container[data-volume-level="muted"] .volume-muted-icon {
+    display: block;
+  }/*using state instead class change*/
+  
+  .volume-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .volume-slider {
+    width: 0;/*deafult will be 0 unless hovered over*/
+    transform-origin: left;/*so that the slider grows from the left*/
+    transform: scaleX(0);/*so that the default blue dot becomes invisible*/
+    transition: width 150ms ease-in-out, transform 150ms ease-in-out;/*affect of hover function*/
+  }
+  
+  .volume-container:hover .volume-slider,
+  .volume-slider:focus-within {
+    width: 100px;
+    transform: scaleX(1);
+  }
+  
+  .duration-container {
+    display: flex;/*to get it in same line*/
+    align-items: center;
+    gap: .25rem;
+    flex-grow: 1;/*pushes all the other icons to the extreme right and divides space in proportion*/
+  }
+  
+  .video-container.captions .captions-btn {
+    border-bottom: 3px solid red;
+  }
+  
+  .video-controls-container .controls button.wide-btn {
+    width: 50px;
+  }/*widening it*/
+  
+  .timeline-container {
+    height: 7px;
+    margin-inline: .5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .timeline {
+    background-color: rgba(100, 100, 100, .5);
+    height: 3px;
+    width: 100%;
+    position: relative/*all ele within it are placed absolutely*/
+  }
+  
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: calc(100% - var(--preview-position) * 100%);/* if prev is 20% it fills 80%*/
+    background-color: rgb(150, 150, 150);
+    display: none;
+  }/*time left*/
+  
+  .timeline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: calc(100% - var(--progress-position) * 100%);/* how much time is already covered*/
+    background-color: red;
+  }
+  
+  .timeline .thumb-indicator {
+    --scale: 0;
+    position: absolute;
+    transform: translateX(-50%) scale(var(--scale));/*centering of the circle*/
+    height: 200%;
+    top: -50%;
+    left: calc(var(--progress-position) * 100%);
+    background-color: red;
+    border-radius: 50%;
+    transition: transform 150ms ease-in-out;
+    aspect-ratio: 1 / 1;/*square*/
+  }/*red circle*/
+  
+  .timeline .preview-img {
+    position: absolute;
+    height: 80px;
+    aspect-ratio: 16 / 9;
+    top: -1rem;/*1rem above cursor*/
+    transform: translate(-50%, -100%);/*pre vimage centered by x and above timeline by y*/
+    left: calc(var(--preview-position) * 100%);
+    border-radius: .25rem;
+    border: 2px solid white;
+    display: none;
+  }
+  
+  .thumbnail-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }/*shoud be visible when we click and drag through the timeline hence scrubbing*/
+  
+  .video-container.scrubbing .thumbnail-img {
+    display: block;
+  }
+  
+  .video-container.scrubbing .preview-img,
+  .timeline-container:hover .preview-img {
+    display: block;
+  }
+  
+  .video-container.scrubbing .timeline::before,
+  .timeline-container:hover .timeline::before {
+    display: block;
+  }
+  
+  .video-container.scrubbing .thumb-indicator,
+  .timeline-container:hover .thumb-indicator {
+    --scale: 1;
+  }
+  
+  .video-container.scrubbing .timeline,
+  .timeline-container:hover .timeline {
+    height: 100%;
+  }
